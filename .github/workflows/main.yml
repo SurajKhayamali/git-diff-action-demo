@@ -17,7 +17,7 @@ jobs:
           fetch-depth: 0 # needed to checkout all branches for this Action to work
 
       # Check the PR diff using the current branch and the base branch of the PR
-      - uses: GrantBirki/git-diff-action@vX.X.X
+      - uses: GrantBirki/git-diff-action@v2.8.1
         id: git-diff-action
         with:
           json_diff_file_output: diff.json
@@ -25,13 +25,46 @@ jobs:
           file_output_only: "true"
 
       # Print the diff in JSON format
-      - name: print json diff
+      - name: print json diff path
         env:
           DIFF: ${{ steps.git-diff-action.outputs.json-diff-path }}
         run: cat $DIFF
 
       # Print the diff in raw git format
-      - name: print raw diff
+      - name: print raw diff path
         env:
           DIFF: ${{ steps.git-diff-action.outputs.raw-diff-path }}
         run: cat $DIFF
+
+      # Print the diff in JSON format
+      - name: print json diff
+        env:
+          DIFF: ${{ steps.git-diff-action.outputs.json-diff }}
+        run: cat $DIFF
+
+      # Print the diff in raw git format
+      - name: print raw diff
+        env:
+          DIFF: ${{ steps.git-diff-action.outputs.raw-diff }}
+        run: cat $DIFF
+
+      # Detect changed apps in apps/ folder
+      - name: Detect changed apps
+        id: detect-apps
+        run: |
+          changed_apps=$(grep -oP '^diff --git a/apps/\K[^/]*' diff.txt | sort -u | xargs)
+          echo "changed_apps=${changed_apps}" >> "$GITHUB_OUTPUT"
+
+      # Use the detected apps (example)
+      - name: Print changed apps
+        run: |
+          echo 'Apps to deploy: ${{ steps.detect-apps.outputs.changed_apps }}'
+
+      # Deploy changed apps sequentially
+      - name: Deploy changed apps sequentially
+        run: |
+          for app in ${{ steps.detect-apps.outputs.changed_apps }}; do
+            echo "Deploying $app..."
+            # Place your deployment command here, for example:
+            # ./deploy.sh apps/$app
+          done

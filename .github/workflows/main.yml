@@ -52,7 +52,7 @@ jobs:
       - name: Detect changed apps
         id: detect-apps
         run: |
-          changed_apps=$(grep -oP '^diff --git a/apps/\K[^/]*' diff.txt | sort -u | xargs)
+          changed_apps=$(awk '/^diff --git a\/apps\// {split($4, a, "/"); print a[3]}' diff.txt | sort -u | xargs)
           echo "changed_apps=$changed_apps" >> $GITHUB_OUTPUT
 
       # Use the detected apps (example)

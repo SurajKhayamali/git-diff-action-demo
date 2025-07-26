@@ -57,6 +57,8 @@ jobs:
 
       # Use the detected apps (example)
       - name: Print changed apps
-        run: echo "Apps to deploy: ${{ steps.detect-apps.outputs.changed_apps }}"
+        env:
+          DIFF: ${{ steps.detect-apps.outputs.changed_apps }}
+        run: cat $DIFF
 
 

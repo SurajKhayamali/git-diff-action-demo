@@ -60,4 +60,11 @@ jobs:
         run: |
           echo 'Apps to deploy: ${{ steps.detect-apps.outputs.changed_apps }}'
 
-
+      # Deploy changed apps sequentially
+      - name: Deploy changed apps sequentially
+        run: |
+          for app in ${{ steps.detect-apps.outputs.changed_apps }}; do
+            echo "Deploying $app..."
+            # Place your deployment command here, for example:
+            # ./deploy.sh apps/$app
+          done
